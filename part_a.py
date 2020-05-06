@@ -7,13 +7,18 @@ spark = SparkSession.builder.appName('fun').getOrCreate()
 
 
 def get_connected_components(graphframe):
-    # TODO:
+    # TODO: 
     # get_connected_components is given a graphframe that represents the given graph
     # It returns a list of lists of ids.
     # For example, [[a_1, a_2, ...], [b_1, b_2, ...], ...]
     # then a_1, a_2, ..., a_n lie in the same component,
     # b_1, b2, ..., b_m lie in the same component, etc
-    return [[]]
+    rows = graphframe.connectedComponents().collect()
+    result = [[]]
+    for row in rows:
+        result.append(row.component)
+    return result
+    #return [[]]
 
 
 if __name__ == "__main__":
