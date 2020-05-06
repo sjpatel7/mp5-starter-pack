@@ -15,8 +15,12 @@ def get_connected_components(graphframe):
     # b_1, b2, ..., b_m lie in the same component, etc
     rows = graphframe.connectedComponents().collect()
     result = [[]]
+    components = {}
     for row in rows:
-        result.append(row.component)
+        components.setdefault(row.component, []).append(row.id)
+    for c in components:
+        result.append(components[c])
+    result.pop(0)
     return result
     #return [[]]
 
@@ -28,7 +32,7 @@ if __name__ == "__main__":
         for line in f:
             nodes = line.split(' ')
             src = nodes[0] if len(nodes) > 0 else None  # TODO: Parse src from line
-            dst_list = nodes[1:-1] if len(nodes) > 1 else []  # TODO: Parse dst_list from line
+            dst_list = nodes[1:] if len(nodes) > 1 else []  # TODO: Parse dst_list from line
             vertex_list.append((src,))
             edge_list += [(src, dst) for dst in dst_list]
 
