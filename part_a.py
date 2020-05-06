@@ -28,12 +28,12 @@ if __name__ == "__main__":
         for line in f:
             nodes = line.split(' ')
             src = nodes[0] if len(nodes) > 0 else None  # TODO: Parse src from line
-            dst_list = nodes[1,-1] if len(nodes) > 1 else []  # TODO: Parse dst_list from line
+            dst_list = nodes[1:-1] if len(nodes) > 1 else []  # TODO: Parse dst_list from line
             vertex_list.append((src,))
             edge_list += [(src, dst) for dst in dst_list]
 
-    vertices = spark.createDataFrame(vertex_list)  # TODO: Create vertices dataframe
-    edges = spark.createDataFrame(edge_list)  # TODO: Create edges dataframe
+    vertices = spark.createDataFrame(vertex_list, ["id"])  # TODO: Create vertices dataframe
+    edges = spark.createDataFrame(edge_list, ["src", "dst"])  # TODO: Create edges dataframe
 
     g = GraphFrame(vertices, edges)
     sc.setCheckpointDir("/tmp/connected-components")
