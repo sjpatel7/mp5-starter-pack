@@ -31,7 +31,7 @@ def get_clusters(data_rdd, num_clusters=NUM_CLUSTERS, max_iterations=MAX_ITERATI
         cars[point[0]] = array([x for x in point[1:]])
     
     points = data_rdd.map(lambda line: array([float(x) for x in line.split(',')[1:]]))
-    clusters = KMeans.train(points, 4, maxIterations=100, initializationMode="random")
+    clusters = KMeans.train(points, num_clusters, maxIterations=max_iterations, initializationMode=initialization_mode, seed=seed)
     car_clusters = {}
     ct = 0
     for car in cars:
@@ -47,7 +47,6 @@ def get_clusters(data_rdd, num_clusters=NUM_CLUSTERS, max_iterations=MAX_ITERATI
         result.append(cluster)
     result.remove([])
     return result
-
 
 if __name__ == "__main__":
     f = sc.textFile("dataset/cars.data")
