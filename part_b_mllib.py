@@ -15,7 +15,6 @@ INITIALIZATION_MODE = "random"
 
 sc = SparkContext()
 
-
 def get_clusters(data_rdd, num_clusters=NUM_CLUSTERS, max_iterations=MAX_ITERATIONS,
                  initialization_mode=INITIALIZATION_MODE, seed=SEED):
     # TODO:
@@ -25,27 +24,16 @@ def get_clusters(data_rdd, num_clusters=NUM_CLUSTERS, max_iterations=MAX_ITERATI
     # For example, if the output is [["Mercedes", "Audi"], ["Honda", "Hyundai"]]
     # Then "Mercedes" and "Audi" should have the same cluster id, and "Honda" and
     # "Hyundai" should have the same cluster id
-    cars = {}
-    for line in data_rdd.collect():
-        point = line.split(',')
-        cars[point[0]] = array([x for x in point[1:]])
+    features = data_rdd.map(lambda line: array([float(x) for x in line.split(',')[1:]]))
+    clusters = KMeans.train(features, num_clusters, maxIterations=max_iterations, initializationMode=initialization_mode, seed=seed)
     
-    points = data_rdd.map(lambda line: array([float(x) for x in line.split(',')[1:]]))
-    clusters = KMeans.train(points, num_clusters, maxIterations=max_iterations, initializationMode=initialization_mode, seed=seed)
-    car_clusters = {}
-    ct = 0
-    for car in cars:
-        features = cars[car]
-        c = clusters.predict(features)
-        car_clusters.setdefault(c, []).append(car)
-        
+    res = data_rdd.map(lambda line: (clusters.predict(array([float(x) for x in line.split(',')[1:]])), [line.split(',')[0]])).reduceByKey(lambda a, b: a + b)
     result = [[]]
-    for c in car_clusters:
-        cluster = []
-        for car in car_clusters[c]:
-            cluster.append(car)
-        result.append(cluster)
-    result.remove([])
+    res = res.collect()
+    for c in res:
+        result.append(c[1])
+    if [] in result:
+        result.remove([])
     return result
 
 if __name__ == "__main__":
